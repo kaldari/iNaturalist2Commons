@@ -1,0 +1,21 @@
+#import-dialog ol {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+}
+#import-dialog ol li {
+	margin: 3px;
+	padding: 0;
+	border: 3px solid transparent;
+	float: left;
+	width: 75px;
+	height: 75px;
+}
+#import-dialog ol li:hover{
+	cursor: pointer;
+	border-color: #36b;
+}
+#import-dialog #import-images, #import-dialog #import-message, #import-dialog #import-error {
+	margin-top: 0.4em;
+}
