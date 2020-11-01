@@ -1,6 +1,10 @@
 // This script adds a new "iNaturalist Import" button to taxon categories or gallery
 // pages (whichever one is associated with the Wikidata item for the taxon).
 
+// The code for this script is hosted on GitHub (https://github.com/kaldari/iNaturalist2Commons)
+// and any issues may be reported there. It is dual licensed under the MIT License
+// and the Creative Commons Attribution-ShareAlike License.
+
 //<nowiki>
 
 // Make sure we are on a Category page and in view mode.
