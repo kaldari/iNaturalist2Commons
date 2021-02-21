@@ -41,7 +41,7 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 				$previewInterface = $( '<div></div>', {
     			id: "preview-dialog",
     			style: "position: relative; text-align: center; min-height: 500px;",
-					html: "<p><img src='https://static.inaturalist.org/photos/" + uploadParams.photoId + "/medium." + imageExtension + "' /><\p>"
+                    html: "<p><img src='" + uploadParams.mediumUrl + "' /><\p>"
 				} )
 				.dialog({
 					width: 600,
@@ -54,6 +54,8 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 							text: "Upload image",
 							classes: "inaturalist-upload-button",
 							click: function() {
+                                uploadParams.mediumUrl =  uploadParams.thumbUrl.replace('/square', '/medium');
+                                uploadParams.originalUrl =  uploadParams.thumbUrl.replace('/square', '/original');
 								$previewInterface.dialog( 'close' );
 								inat2commons.launchUpload( uploadParams );
 							}
@@ -80,7 +82,7 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 				}
 				var ext = uploadParams.thumbUrl.split( '?' )[0].split('.').slice( -1 );
 				var targetName = `${uploadParams.taxon} ${uploadParams.photoId}.jpg`;
-				var original = `https://static.inaturalist.org/photos/${uploadParams.photoId}/original.${ext}`;
+                var original = uploadParams.originalUrl;
 				if ( uploadParams.userName ) {
 					author = uploadParams.userName;
 				} else {
