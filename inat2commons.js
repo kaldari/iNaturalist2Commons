@@ -38,9 +38,10 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 
 			launchPreview: function( uploadParams ) {
 				var imageExtension = uploadParams.thumbUrl.split('.').pop();
+				uploadParams.mediumUrl =  uploadParams.thumbUrl.replace('/square', '/medium');
 				$previewInterface = $( '<div></div>', {
-    			id: "preview-dialog",
-    			style: "position: relative; text-align: center; min-height: 500px;",
+					id: "preview-dialog",
+					style: "position: relative; text-align: center; min-height: 500px;",
                     html: "<p><img src='" + uploadParams.mediumUrl + "' /><\p>"
 				} )
 				.dialog({
@@ -54,7 +55,6 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 							text: "Upload image",
 							classes: "inaturalist-upload-button",
 							click: function() {
-                                uploadParams.mediumUrl =  uploadParams.thumbUrl.replace('/square', '/medium');
                                 uploadParams.originalUrl =  uploadParams.thumbUrl.replace('/square', '/original');
 								$previewInterface.dialog( 'close' );
 								inat2commons.launchUpload( uploadParams );
