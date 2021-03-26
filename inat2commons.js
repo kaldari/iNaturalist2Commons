@@ -125,7 +125,7 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 				var iNatApi = 'https://api.inaturalist.org/v1/observations';
 				var uri = new mw.Uri();
 				var maxImages = 104;
-				var params = { 'photo_license': 'cc0,cc-by,cc-by-sa', 'quality_grade': 'research', 'taxon_id': iNatId };
+				var params = { 'license_code': 'cc0,cc-by,cc-by-sa', 'quality_grade': 'research', 'taxon_id': iNatId };
 
 				// Allow overriding quality grade with a query string parameter
 				// For example '?inatquality=casual' or '?inatquality=needs_id'
