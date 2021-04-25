@@ -127,6 +127,12 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 				var maxImages = 104;
 				var params = { 'photo_license': 'cc0,cc-by,cc-by-sa', 'quality_grade': 'research', 'taxon_id': iNatId };
 
+				// Allow overriding with an observation ID
+				// For example '?inatid=73898408'
+				if ( typeof uri.query.inatid !== 'undefined' ) {
+					params.id = uri.query.inatid;
+				}
+
 				// Allow overriding quality grade with a query string parameter
 				// For example '?inatquality=casual' or '?inatquality=needs_id'
 				if ( typeof uri.query.inatquality !== 'undefined' ) {
