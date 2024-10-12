@@ -36,6 +36,10 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 				$( '#import-dialog' ).append ( $( '<div class="import-error" style="color:#990000;"></div>' ).html( 'Error: '+error ) );
 			},
 
+			capitalizeFirstLetter: function( string ) {
+				return string.charAt(0).toUpperCase() + string.slice(1);
+			},
+
 			launchPreview: function( uploadParams ) {
 				var imageExtension = uploadParams.thumbUrl.split('.').pop();
 				uploadParams.mediumUrl =  uploadParams.thumbUrl.replace('/square', '/medium');
@@ -73,7 +77,7 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 				var author = '';
 				if ( uploadParams.taxonRank === 'species' || uploadParams.taxonRank === 'subspecies' ) {
 					if ( uploadParams.commonName !== undefined ) {
-						description = uploadParams.commonName + " (''" + uploadParams.taxon + "'')";
+						description = inat2commons.capitalizeFirstLetter( uploadParams.commonName ) + " (''" + uploadParams.taxon + "'')";
 					} else {
 						description = "''" + uploadParams.taxon + "''";
 					}
