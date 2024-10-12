@@ -68,7 +68,7 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 				});
 				$previewInterface.dialog( 'open' );
 			},
-			
+
 			launchUpload: function( uploadParams ) {
 				var href = '';
 				var uploadPage = 'https://commons.wikimedia.org/wiki/Special:Upload';
@@ -84,30 +84,6 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 				} else {
 					description = uploadParams.taxon;
 				}
-				var ext = uploadParams.thumbUrl.split( '?' )[0].split('.').slice( -1 );
-				var targetName = `${uploadParams.taxon} ${uploadParams.photoId}.jpg`;
-                var original = uploadParams.originalUrl;
-				if ( uploadParams.userName ) {
-					author = uploadParams.userName;
-				} else {
-					author = uploadParams.userLogin;
-				}
-				var location = ( uploadParams.geojson !== undefined ) ? `
-{{Location|${uploadParams.geojson.coordinates[1]}|${uploadParams.geojson.coordinates[0]}}}` : '';
-				var summary = `{{Information
-|description={{en|${description}}}
-|date=${uploadParams.date}
-|source=https://www.inaturalist.org/photos/${uploadParams.photoId}
-|author=[https://www.inaturalist.org/users/${uploadParams.userId} ${author}]
-|permission=
-|other versions=
-}}${location}
-{{iNaturalist|${uploadParams.observationId}}}
-{{iNaturalistreview}}
-
-[[Category:${uploadParams.category}]]
-[[Category:Uploaded with iNaturalist2Commons]]
-`;
 				switch ( uploadParams.photoLicense ) {
         			case 'cc-by':
             			license = 'cc-by-4.0';
@@ -121,8 +97,46 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
         			default:
             			return '';
     			}
-				var href = `${uploadPage}?wpUploadDescription=${encodeURIComponent(summary)}&wpLicense=${license}&wpDestFile=${targetName}&wpSourceType=url&wpUploadFileURL=${original}`;
-				window.open( href, "uploadWindow" );
+    			var ext = uploadParams.thumbUrl.split( '?' )[0].split('.').slice( -1 );
+				var targetName = `${uploadParams.taxon} ${uploadParams.photoId}.jpg`;
+                var original = uploadParams.originalUrl;
+				if ( uploadParams.userName ) {
+					author = uploadParams.userName;
+				} else {
+					author = uploadParams.userLogin;
+				}
+				var location = ( uploadParams.geojson !== undefined ) ? `
+{{Location|${uploadParams.geojson.coordinates[1]}|${uploadParams.geojson.coordinates[0]}}}` : '';
+				var placeList = uploadParams.places.toString();
+				var iNatApi = 'https://api.inaturalist.org/v1/places/' + placeList;
+				var params = { 'admin_level': '0' };
+				$.getJSON( iNatApi, params )
+					.always( function( data ) {
+						if ( data.results[0] !== undefined && data.results[0].name !== undefined ) {
+							var country = data.results[0].name;
+							var theCountries = ["Bahamas", "Cayman Islands", "Central African Republic", "Channel Islands", "Comoros", "Czech Republic", "Dominican Republic", "Falkland Islands", "Gambia", "Isle of Man", "Ivory Coast", "Leeward Islands", "Maldives", "Marshall Islands", "Netherlands", "Netherlands Antilles", "Philippines", "Solomon Islands", "Turks and Caicos Islands", "United Arab Emirates", "United Kingdom", "United States", "Virgin Islands"];
+							if ( theCountries.includes( country ) ) {
+								country = "the " + country;
+							}
+							description += " in " + country;
+						}
+						var summary = `{{Information
+|description={{en|${description}}}
+|date=${uploadParams.date}
+|source=https://www.inaturalist.org/photos/${uploadParams.photoId}
+|author=[https://www.inaturalist.org/users/${uploadParams.userId} ${author}]
+|permission=
+|other versions=
+}}${location}
+{{iNaturalist|${uploadParams.observationId}}}
+{{iNaturalistreview}}
+
+[[Category:${uploadParams.category}]]
+[[Category:Uploaded with iNaturalist2Commons]]
+`;
+						var href = `${uploadPage}?wpUploadDescription=${encodeURIComponent(summary)}&wpLicense=${license}&wpDestFile=${targetName}&wpSourceType=url&wpUploadFileURL=${original}`;
+						window.open( href, "uploadWindow" );
+				} );
 			},
 
 			launchDialog: function() {
@@ -184,6 +198,7 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 											date: observation.observed_on,
 											taxon: observation.taxon.name,
 											taxonRank: observation.taxon.rank,
+											places: observation.place_ids,
 											thumbUrl: photoData.url,
 											category: mw.config.get( 'wgTitle' )
 										};
