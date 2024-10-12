@@ -85,21 +85,21 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 					description = uploadParams.taxon;
 				}
 				switch ( uploadParams.photoLicense ) {
-        			case 'cc-by':
-            			license = 'cc-by-4.0';
-            			break;
-        			case 'cc-by-sa':
-            			license = 'cc-by-sa-4.0';
-            			break;
-        			case 'cc0':
-            			license = 'Cc-zero';
-            			break;
-        			default:
-            			return '';
-    			}
-    			var ext = uploadParams.thumbUrl.split( '?' )[0].split('.').slice( -1 );
+					case 'cc-by':
+						license = 'cc-by-4.0';
+						break;
+					case 'cc-by-sa':
+						license = 'cc-by-sa-4.0';
+						break;
+					case 'cc0':
+						license = 'Cc-zero';
+						break;
+					default:
+						return '';
+				}
+				var ext = uploadParams.thumbUrl.split( '?' )[0].split('.').slice( -1 );
 				var targetName = `${uploadParams.taxon} ${uploadParams.photoId}.jpg`;
-                var original = uploadParams.originalUrl;
+				var original = uploadParams.originalUrl;
 				if ( uploadParams.userName ) {
 					author = uploadParams.userName;
 				} else {
