@@ -141,25 +141,25 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 
 			launchDialog: function() {
 				var iNatApi = 'https://api.inaturalist.org/v1/observations';
-				var uri = new mw.Uri();
+				var uri = new URL(window.location);
 				var maxImages = 104;
 				var params = { 'photo_license': 'cc0,cc-by,cc-by-sa', 'quality_grade': 'research', 'taxon_id': iNatId };
 
 				// Allow overriding with an observation ID
 				// For example '?inatid=73898408'
-				if ( typeof uri.query.inatid !== 'undefined' ) {
-					params.id = uri.query.inatid;
+				if ( uri.searchParams.get('inatid') ) {
+					params.id = uri.searchParams.get('inatid');
 				}
 
 				// Allow overriding quality grade with a query string parameter
 				// For example '?inatquality=casual' or '?inatquality=needs_id'
-				if ( typeof uri.query.inatquality !== 'undefined' ) {
-					params.quality_grade = uri.query.inatquality;
+				if ( uri.searchParams.get('inatquality') ) {
+					params.quality_grade = uri.searchParams.get('inatquality');
 				}
 
 				// Allow overriding number of images with a query string parameter
-				if ( typeof uri.query.inatquantity !== 'undefined' ) {
-					maxImages = parseInt( uri.query.inatquantity );
+				if ( uri.searchParams.get('inatquantity') ) {
+					maxImages = parseInt( uri.searchParams.get('inatquantity') );
 				}
 				params.per_page = maxImages - 20; // Some observations have multiple images
 
