@@ -1,9 +1,34 @@
+#import-controls {
+	margin-bottom: 0.8em;
+	padding-bottom: 0.8em;
+	border-bottom: 1px solid #a2a9b1;
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.6em 1.2em;
+}
+
+#import-controls label {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35em;
+}
+
+#import-controls input {
+	max-width: 8em;
+}
+
+#import-results {
+	margin-top: 0.4em;
+}
+
 #import-dialog ol {
 	list-style-type: none;
 	margin: 0;
 	padding: 0;
 	width: 100%;
 }
+
 #import-dialog ol li {
 	margin: 3px;
 	padding: 0;
@@ -12,10 +37,12 @@
 	width: 75px;
 	height: 75px;
 }
+
 #import-dialog ol li:hover{
 	cursor: pointer;
 	border-color: #36b;
 }
+
 #import-dialog #import-images, #import-dialog #import-message, #import-dialog #import-error {
 	margin-top: 0.4em;
 }
