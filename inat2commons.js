@@ -22,18 +22,25 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 		inat2commons = {
 
 			displayProgress: function( message ) {
-				$( '#import-dialog div' ).remove(); // remove everything else from the dialog box
-				$( '#import-dialog' ).append ( $( '<div class="import-progress" style="text-align:center;margin:1.8em 0;"></div>' ).html( message+'<br/><br/><img src="//upload.wikimedia.org/wikipedia/commons/4/42/Loading.gif" />' ) );
+				// Keep the search controls visible while the results area updates.
+				$( '#import-results' ).empty().append(
+					$( '<div class="import-progress" style="text-align:center;margin:1.8em 0;"></div>' )
+						.html( message+'<br/><br/><img src="//upload.wikimedia.org/wikipedia/commons/4/42/Loading.gif" />' )
+				);
 			},
 
 			displayMessage: function( message ) {
-				$( '#import-dialog div' ).remove(); // remove everything else from the dialog box
-				$( '#import-dialog' ).append ( $( '<div class="import-message"></div>' ).html( message ) );
+				// Keep the search controls visible while the results area updates.
+				$( '#import-results' ).empty().append(
+					$( '<div class="import-message"></div>' ).html( message )
+				);
 			},
 
 			displayError: function( error ) {
-				$( '#import-dialog div' ).remove(); // remove everything else from the dialog box
-				$( '#import-dialog' ).append ( $( '<div class="import-error" style="color:#990000;"></div>' ).html( 'Error: '+error ) );
+				// Keep the search controls visible while the results area updates.
+				$( '#import-results' ).empty().append(
+					$( '<div class="import-error" style="color:#990000;"></div>' ).html( 'Error: '+error )
+				);
 			},
 
 			capitalizeFirstLetter: function( string ) {
@@ -141,32 +148,31 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 
 			launchDialog: function() {
 				var iNatApi = 'https://api.inaturalist.org/v1/observations';
-				var uri = new URL(window.location);
-				var maxImages = 104;
-				var params = { 'photo_license': 'cc0,cc-by,cc-by-sa', 'quality_grade': 'research', 'taxon_id': iNatId };
 
-				// Allow overriding with an observation ID
-				// For example '?inatid=73898408'
-				if ( uri.searchParams.get('inatid') ) {
-					params.id = uri.searchParams.get('inatid');
+				// Read the parameters from the dialog form.
+				var qualityGrade = $( '#inat-quality-grade' ).val() || 'research';
+				var requestedImages = parseInt( $( '#inat-image-count' ).val(), 10 );
+				var maxImages = ( Number.isFinite( requestedImages ) && requestedImages > 0 ) ? requestedImages : 80;
+				var observationId = $.trim( $( '#inat-observation-id' ).val() );
+
+				var params = {
+					'photo_license': 'cc0,cc-by,cc-by-sa',
+					'quality_grade': qualityGrade,
+					'taxon_id': iNatId
+				};
+
+				// Allow a specific observation to be queried via the form field.
+				if ( observationId ) {
+					params.id = observationId;
 				}
 
-				// Allow overriding quality grade with a query string parameter
-				// For example '?inatquality=casual' or '?inatquality=needs_id'
-				if ( uri.searchParams.get('inatquality') ) {
-					params.quality_grade = uri.searchParams.get('inatquality');
-				}
+				// Keep the standard max-images behavior but drive it from the form controls.
+				params.per_page = Math.max( 1, maxImages - 10 ); // Some observations have multiple images
 
-				// Allow overriding number of images with a query string parameter
-				if ( uri.searchParams.get('inatquantity') ) {
-					maxImages = parseInt( uri.searchParams.get('inatquantity') );
-				}
-				params.per_page = maxImages - 20; // Some observations have multiple images
-
-				// Restore dialog to original state
-				inat2commons.displayProgress( 'Loading images...');
-				// Open the dialog box
+				// Restore dialog to original state while leaving the controls in place.
+				inat2commons.displayProgress( 'Loading images...' );
 				$importInterface.dialog( 'open' );
+
 				// Retrieve images
 				$.getJSON( iNatApi, params )
 					.done( function( data ) {
@@ -175,19 +181,25 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 						} else {
 							var headerAdded = false;
 							var x = 0;
+
 							// Go through each observation
 							data.results.forEach( function( observation ) {
 								// Go through each photo
 								observation.photos.forEach( function( photoData ) {
 									var licenseCode = photoData.license_code;
+
 									// If the license is compatible, display the photo
 									if ( ( licenseCode === 'cc-by' || licenseCode === 'cc-by-sa' || licenseCode === 'cc0' ) && x < maxImages ) {
 										// Create dialog header once we know there is at least one free-license image
 										if ( headerAdded === false ) {
-											$( '#import-dialog div' ).remove();
-											$( '#import-dialog' ).append( $( '<div id="import-images"></div>' ).html( 'Select an image to preview:<br/>' ).append ( $( '<ol></ol>' ) ) );
+											$( '#import-results' ).empty().append(
+												$( '<div id="import-images"></div>' )
+													.html( 'Select an image to preview:<br/>' )
+													.append( $( '<ol></ol>' ) )
+											);
 											headerAdded = true;
 										}
+
 										var uploadParams = {
 											photoId: photoData.id,
 											photoLicense: photoData.license_code,
@@ -208,16 +220,18 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 										if ( observation.taxon.preferred_common_name !== undefined ) {
 											uploadParams.commonName = observation.taxon.preferred_common_name;
 										}
-										$( '#import-dialog ol' ).append ( $( '<li></li>' )
-											.html( '<img data-photo-id="' + photoData.id + '" src="' + photoData.url + '" height="75" width="75"/>' )
-											.on( 'click', function() {
-												inat2commons.launchPreview( uploadParams );
-											} )
+										$( '#import-dialog ol' ).append(
+											$( '<li></li>' )
+												.html( '<img data-photo-id="' + photoData.id + '" src="' + photoData.url + '" height="75" width="75"/>' )
+												.on( 'click', function() {
+													inat2commons.launchPreview( uploadParams );
+												} )
 										);
 										x++;
 									}
 								} );
 							} );
+
 							// After going through all the observations, if there are no free-license images, display error
 							if ( headerAdded === false ) {
 								inat2commons.displayMessage( 'No free license images were found for this taxon.');
@@ -261,8 +275,26 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 			},
 
 			initialize: function() {
-				// Define importing interface
-				$importInterface = $('<div id="import-dialog" style="position:relative;"></div>')
+				// Define importing interface with a fixed form at the top and a results area below it.
+				$importInterface = $('<div id="import-dialog" style="position:relative;">' +
+					'<div id="import-controls">' +
+						'<label for="inat-quality-grade">Quality grade ' +
+							'<select id="inat-quality-grade">' +
+								'<option value="research" selected>Research</option>' +
+								'<option value="needs_id">Needs ID</option>' +
+								'<option value="casual">Casual</option>' +
+							'</select>' +
+						'</label>' +
+						'<label for="inat-image-count">Number of images ' +
+							'<input id="inat-image-count" type="number" min="1" step="1" value="80">' +
+						'</label>' +
+						'<label for="inat-observation-id">Observation ID ' +
+							'<input id="inat-observation-id" type="text" value="">' +
+						'</label>' +
+						'<button id="inat-refresh-search" type="button">Refresh Search</button>' +
+					'</div>' +
+					'<div id="import-results"></div>' +
+				'</div>')
 					.dialog({
 						width: 724,
 						autoOpen: false,
@@ -270,6 +302,12 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 						modal: true,
 						position: { my: "top", at: "top+100", of: "body" },
 					});
+
+				// Refresh the image set using the values currently entered into the form.
+				$( '#inat-refresh-search' ).button().on( 'click', function() {
+					inat2commons.launchDialog();
+				} );
+
 				// Define the import button
 				$button = $( '<button>' )
 					.attr( 'style', 'margin: 0 0.5em 0.5em 0.5em; text-decoration: none; font-size: 15px;' )
