@@ -151,7 +151,7 @@ if ( ( mw.config.get( 'wgNamespaceNumber' ) === 0 || mw.config.get( 'wgNamespace
 
 				// Read the parameters from the dialog form.
 				var qualityGrade = $( '#inat-quality-grade' ).val() || 'research';
-				var requestedImages = parseInt( $( '#inat-image-count' ).val(), 10 );
+				var requestedImages = parseInt( $( '#inat-image-count' ).val() );
 				var maxImages = ( requestedImages < 300 && requestedImages > 0 ) ? requestedImages : 80;
 				var observationId = $.trim( $( '#inat-observation-id' ).val() );
 
